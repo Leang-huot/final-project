@@ -54,6 +54,6 @@ void interface(){
 }
 int main(){
     interface();
-    
+    leanghuot;
     return 0;
 }
