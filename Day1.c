@@ -4,11 +4,12 @@
 //Day 1 
 //Structure
 typedef struct {
-    char Acc_name[50];
+  
     char username[50];
     char password[20];
 }User_login;
 typedef struct{
+    char Acc_name[50];
     int accountNumber;
     double USD;
     double KHR;
@@ -25,6 +26,8 @@ int accountNumber;
 int accountcount = 0;
 int NextAccountNumber = 100;
 
+
+int LoginFunction();
 void interface();
 void AccountCreation();
 
@@ -33,6 +36,7 @@ int main(){
 
     return 0;
 }
+//Interface
 void interface(){
     int choice = 0;
     
@@ -51,9 +55,16 @@ void interface(){
                 AccountCreation();
 
                 break;
-            case 2:
-                printf("not create yet");
+            case 2:{
+                int index = LoginFunction();
+
+                if (index != -1) {
+                    printf("\nLogin successful!\n");
+                } else {
+                    printf("\nInvalid username or password.\n");
+                }
                 break;
+            }
             case 3: 
                 printf("----------THANK YOU FORR USING OUR APP----------\n");
                 break;
@@ -63,7 +74,7 @@ void interface(){
     }while ( choice != 3);
 
 }
-
+//Create account funtion
 void AccountCreation(){
     int valid;
     account NewAccount;
@@ -75,7 +86,7 @@ void AccountCreation(){
     }
     printf("------Please Create Your Account To Login------\n");
     printf("Enter Account name : ");
-        scanf("%49s", NewAccount.login.Acc_name);
+        scanf("%49s", NewAccount.Acc_name);
     printf("Enter your username :");
         scanf("%49s", NewAccount.login.username);
 do {
@@ -107,8 +118,39 @@ do {
     Accounts[accountcount] = NewAccount;
     accountcount++;
     printf("\n------Account created successfully------!\n");
-    printf("Account Username: %s\n", NewAccount.login.Acc_name);
+    printf("Account Username: %s\n", NewAccount.Acc_name);
     printf("Accont logint name : %s\n", NewAccount.login.username);
     printf("Account ID: %d\n", NewAccount.accountNumber);
     
+}
+// Login funtion
+int LoginFunction(){
+    char Log_User[50];
+    char Log_Pass[50];
+    if (accountcount == 0) {
+        printf("There's no account to login\n");
+        return -1;
+    }
+
+
+    printf("-----Login into your account-----\n");
+    printf("Enter Your Username to login :");
+    scanf("%49s", Log_User);
+    printf("Enter Your Password to login :");
+    scanf("%19s", Log_Pass);
+//i < accountcount mean on login with one account 
+/*Return i mean send back the index of that account
+account[0]
+account[1]
+*/
+    for (int i = 0; i<accountcount;i++){
+        if(strcmp(Log_User , Accounts[i].login.username) == 0 &&
+           strcmp(Log_Pass , Accounts[i].login.password) == 0){
+
+            return i;
+           }     
+    }
+//Return -1 = there no account to log, so log is impossible
+    return -1;
+
 }
