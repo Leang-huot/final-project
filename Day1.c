@@ -191,6 +191,9 @@ void BankingFunction(int index){
                 break;
             case 5 :
                 printf("Log out successfully \n");
+                break;
+            case 6 :
+                printf("Show client account\n");
         }
 
 
@@ -236,4 +239,130 @@ void DepositFunction(int index){
     else{
         printf("Invalid Choice\n");
     }
+}
+void WithdrawFunction(int index)
+{
+    int currencyChoice;
+    double amount;
+    printf("\n----------Withdraw Money----------\n");
+    printf("1. Withdraw USD\n");
+    printf("2. Withdraw KHR\n");
+    printf("Enter your choice: ");
+    scanf("%d", &currencyChoice);
+
+    printf("Enter amount: ");
+    scanf("%lf", &amount);
+
+    if (currencyChoice == 1)
+    {
+        if (Accounts[index].USD >= amount)
+        {
+            Accounts[index].USD -= amount;
+            printf("Withdraw successful! Current USD balance: %.2lf\n", Accounts[index].USD);
+        }
+        else
+        {
+            printf("Insufficient USD balance.\n");
+        }
+    }
+    else if (currencyChoice == 2)
+    {
+        if (Accounts[index].KHR >= amount)
+        {
+            Accounts[index].KHR -= amount;
+            printf("Withdraw successful! Current KHR balance: %.2lf\n", Accounts[index].KHR);
+        }
+        else
+        {
+            printf("Insufficient KHR balance.\n");
+        }
+    }
+    else
+    {
+        printf("Invalid Choice\n");
+    }
+}
+
+// ---------------- Transfer ----------------
+void TransferFunction(int index)
+{
+    int toAccNum, currencyChoice;
+    double amount;
+    printf("\n----------Transfer Money----------\n");
+    printf("Enter receiver account number: ");
+    scanf("%d", &toAccNum);
+
+    int toIndex = -1;
+    for (int i = 0; i < accountcount; i++)
+    {
+        if (Accounts[i].accountNumber == toAccNum)
+        {
+            toIndex = i;
+            break;
+        }
+    }
+    if (toIndex == -1)
+    {
+        printf("Receiver account not found.\n");
+        return;
+    }
+
+    printf("1. Transfer USD\n");
+    printf("2. Transfer KHR\n");
+    printf("Enter your choice: ");
+    scanf("%d", &currencyChoice);
+
+    printf("Enter amount: ");
+    scanf("%lf", &amount);
+
+    if (currencyChoice == 1)
+    {
+        if (Accounts[index].USD >= amount)
+        {
+            Accounts[index].USD -= amount;
+            Accounts[toIndex].USD += amount;
+            printf("Transfer successful! Your USD balance: %.2lf\n", Accounts[index].USD);
+        }
+        else
+        {
+            printf("Insufficient USD balance.\n");
+        }
+    }
+    else if (currencyChoice == 2)
+    {
+        if (Accounts[index].KHR >= amount)
+        {
+            Accounts[index].KHR -= amount;
+            Accounts[toIndex].KHR += amount;
+            printf("Transfer successful! Your KHR balance: %.2lf\n", Accounts[index].KHR);
+        }
+        else
+        {
+            printf("Insufficient KHR balance.\n");
+        }
+    }
+    else
+    {
+        printf("Invalid Choice\n");
+    }
+}
+// ---------------- Show Client Account ----------------
+void ShowClientAccount(int index)
+{
+    printf("\n========== CLIENT ACCOUNT SUMMARY ==========\n");
+
+    printf("Account Holder : %s\n", Accounts[index].Acc_name);
+    printf("Username       : %s\n", Accounts[index].login.username);
+    printf("Account Number : %d\n", Accounts[index].accountNumber);
+
+    printf("\n------ Balances ------\n");
+    printf("USD Balance    : %.2lf\n", Accounts[index].USD);
+    printf("🇰🇭 KHR Balance : %.2lf\n", Accounts[index].KHR);
+
+    double convertedKHR = Accounts[index].USD * 4100;
+    printf("Equivalent in KHR (from USD): %.2lf\n", convertedKHR);
+
+    printf("\n------ Savings ------\n");
+    printf("Saving USD   : %.2lf\n", Accounts[index].savingUSD);
+    printf("Saving KHR   : %.2lf\n", Accounts[index].savingKHR);
 }
