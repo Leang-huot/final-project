@@ -37,7 +37,7 @@ int LoginAccount();
 void AccountMenu(int index);
 void CheckBalance(int index);
 void DepositMoney(int index);
-void WithdrawMoney(int index);
+
 
 int main() {
     interface();
@@ -145,7 +145,6 @@ void AccountCreation() {
     printf("Account ID: %d\n", NewAccount.accountNumber);
 }
 
-// Day 2
 // Login account function
 int LoginAccount() {
     char inputUsername[50];
@@ -187,7 +186,8 @@ void AccountMenu(int index) {
         printf("1. Check Balance\n");
         printf("2. Deposit Money\n");
         printf("3. Withdraw Money\n");
-        printf("4. Logout\n");
+        printf("4. Transfer Money\n");
+        printf("5. Logout\n");
         printf("--------------------------------\n");
 
         printf("Enter your choice: ");
@@ -203,10 +203,14 @@ void AccountMenu(int index) {
                 break;
 
             case 3:
-                WithdrawMoney(index);
+          
                 break;
 
             case 4:
+              
+                break;
+
+            case 5:
                 printf("\nLogout successful.\n");
                 break;
 
@@ -214,7 +218,7 @@ void AccountMenu(int index) {
                 printf("Invalid choice. Try again.\n");
         }
 
-    } while (choice != 4);
+    } while (choice != 5);
 }
 
 // Check balance function
@@ -260,44 +264,3 @@ void DepositMoney(int index) {
     }
 }
 
-// Withdraw money function
-void WithdrawMoney(int index) {
-    int currencyChoice;
-    double amount;
-
-    printf("\n----------WITHDRAW MONEY----------\n");
-    printf("1. Withdraw USD\n");
-    printf("2. Withdraw KHR\n");
-    printf("Enter your choice: ");
-    scanf("%d", &currencyChoice);
-
-    printf("Enter amount: ");
-    scanf("%lf", &amount);
-
-    if (amount <= 0) {
-        printf("Amount must be greater than 0.\n");
-        return;
-    }
-
-    if (currencyChoice == 1) {
-        if (amount <= Accounts[index].USD) {
-            Accounts[index].USD -= amount;
-            printf("\nWithdraw successful!\n");
-            printf("New USD Balance: %.2lf USD\n", Accounts[index].USD);
-        } else {
-            printf("Not enough USD balance.\n");
-        }
-    } 
-    else if (currencyChoice == 2) {
-        if (amount <= Accounts[index].KHR) {
-            Accounts[index].KHR -= amount;
-            printf("\nWithdraw successful!\n");
-            printf("New KHR Balance: %.2lf KHR\n", Accounts[index].KHR);
-        } else {
-            printf("Not enough KHR balance.\n");
-        }
-    } 
-    else {
-        printf("Invalid currency choice.\n");
-    }
-}
