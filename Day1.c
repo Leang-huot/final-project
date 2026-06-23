@@ -26,10 +26,9 @@ int accountNumber;
 int accountcount = 0;
 int NextAccountNumber = 100;
 
-
-int LoginFunction();
 void interface();
 void AccountCreation();
+int LoginFunction();
 void BankingFunction(int index);
 void CheckBalance(int index);
 void DepositFunction(int index);
