@@ -39,7 +39,7 @@
     void DepositMoney(int index);
     void WithdrawMoney(int index);
     void TransferMoney(int index);
-    int FindAccountByNumber(int accountNumber);
+    int FindAccountByNumber(int accountNumber); 
 
     int main() {
         interface();

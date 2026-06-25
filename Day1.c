@@ -206,8 +206,8 @@ void CheckBalance(int index){
     
 }
 
-void DepositFunction(int index){
-    int currencyChoice;
+void DepositFunction(int index){    
+        int currencyChoice;
     double amount;
 
 
