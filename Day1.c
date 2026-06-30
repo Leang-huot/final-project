@@ -182,8 +182,8 @@ void BankingFunction(int index){
         printf("2.deposit money\n");
         printf("3.Transfer money\n");
         printf("4.Withdraw money\n");
-        printf("5.Transaction History\n");
-        printf("6.Log out\n");
+        printf("5.Log out\n");
+
 
         printf("Enter your choice : ");
         scanf("%d" , &choice);
@@ -203,6 +203,7 @@ void BankingFunction(int index){
                 break;
             case 5 : 
                 printf("Logout successfully\n");
+                break;
             default : 
                 printf("Invalid choice. Try again\n");
         }
