@@ -1,7 +1,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-//Day 1 
+//Global Variable
+#define Limit_User 100
+#define Exchange_rate 4100
+
+
+
 //Structure
 typedef struct {
   
@@ -10,32 +15,36 @@ typedef struct {
 }User_login;
 typedef struct{
     char Acc_name[50];
-    int accountNumber;
     double USD;
+    int accountNumber;  
     double KHR;
 
     double savingUSD;
     double savingKHR;
 
+    int historyCount;
+
     User_login login;
 }account;
-//Global Variable
-#define Limit_User 100
+
 account Accounts[Limit_User];
 int accountNumber;
 int accountcount = 0;
 int NextAccountNumber = 100;
-
+//Function type
 void interface();
 void AccountCreation();
 int LoginFunction();
 void BankingFunction(int index);
 void CheckBalance(int index);
 void DepositFunction(int index);
+void WithdrawFunction(int index);
+void TransferFunction(int index);
+int FindAccountByNumber(int accountNumber);
+
 
 int main(){
     interface();
-
     return 0;
 }
 //Interface
@@ -55,7 +64,6 @@ void interface(){
         switch(choice){
             case 1: 
                 AccountCreation();
-
                 break;
             case 2:{
                 int index = LoginFunction();
@@ -88,9 +96,9 @@ void AccountCreation(){
         return;
     }
     printf("------Please Create Your Account To Login------\n");
-    printf("Enter Account name : ");
+    printf("Enter Your username : ");
         scanf("%49s", NewAccount.Acc_name);
-    printf("Enter your username :");
+    printf("Enter your loging name : ");
         scanf("%49s", NewAccount.login.username);
 do {
     valid = 1;
@@ -117,12 +125,13 @@ do {
     NewAccount.KHR = 0;
     NewAccount.savingUSD = 0;
     NewAccount.savingKHR = 0;
+    NewAccount.historyCount = 0;
 
     Accounts[accountcount] = NewAccount;
     accountcount++;
     printf("\n------Account created successfully------!\n");
     printf("Account Username: %s\n", NewAccount.Acc_name);
-    printf("Accont logint name : %s\n", NewAccount.login.username);
+    printf("Accont login name : %s\n", NewAccount.login.username);
     printf("Account ID: %d\n", NewAccount.accountNumber);
     
 }
@@ -137,7 +146,7 @@ int LoginFunction(){
 
 
     printf("-----Login into your account-----\n");
-    printf("Enter Your Username to login :");
+    printf("Accont login name:");
     scanf("%49s", Log_User);
     printf("Enter Your Password to login :");
     scanf("%19s", Log_Pass);
@@ -173,7 +182,8 @@ void BankingFunction(int index){
         printf("2.deposit money\n");
         printf("3.Transfer money\n");
         printf("4.Withdraw money\n");
-        printf("5.Log out\n");
+        printf("5.Transaction History\n");
+        printf("6.Log out\n");
 
         printf("Enter your choice : ");
         scanf("%d" , &choice);
@@ -186,14 +196,15 @@ void BankingFunction(int index){
                 DepositFunction(index);
                 break;
             case 3 :
+                TransferFunction(index);
                 break;
             case 4 :
+                WithdrawFunction(index);
                 break;
-            case 5 :
-                printf("Log out successfully \n");
-                break;
-            case 6 :
-                printf("Show client account\n");
+            case 5 : 
+                printf("Logout successfully\n");
+            default : 
+                printf("Invalid choice. Try again\n");
         }
 
 
@@ -209,7 +220,7 @@ void CheckBalance(int index){
 }
 
 void DepositFunction(int index){    
-        int currencyChoice;
+    int currencyChoice;
     double amount;
 
 
@@ -244,6 +255,7 @@ void WithdrawFunction(int index)
 {
     int currencyChoice;
     double amount;
+    char description[100];
     printf("\n----------Withdraw Money----------\n");
     printf("1. Withdraw USD\n");
     printf("2. Withdraw KHR\n");
@@ -252,6 +264,11 @@ void WithdrawFunction(int index)
 
     printf("Enter amount: ");
     scanf("%lf", &amount);
+
+    if (amount <= 0) {
+    printf("Amount must be more than 0.\n");
+    return;
+}
 
     if (currencyChoice == 1)
     {
@@ -282,6 +299,16 @@ void WithdrawFunction(int index)
         printf("Invalid Choice\n");
     }
 }
+int FindAccountByNumber(int accountNumber) {
+    for (int i = 0; i < accountcount; i++) {
+        if (Accounts[i].accountNumber == accountNumber) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
 
 // ---------------- Transfer ----------------
 void TransferFunction(int index)
@@ -289,9 +316,12 @@ void TransferFunction(int index)
     int toAccNum, currencyChoice;
     double amount;
     printf("\n----------Transfer Money----------\n");
-    printf("Enter receiver account number: ");
+    printf("Enter receiver account ID: ");
     scanf("%d", &toAccNum);
-
+    if (amount <= 0) {
+    printf("Amount must be more than 0.\n");
+    return;
+}
     int toIndex = -1;
     for (int i = 0; i < accountcount; i++)
     {
@@ -306,7 +336,7 @@ void TransferFunction(int index)
         printf("Receiver account not found.\n");
         return;
     }
-
+    printf("=========TRANSFER MONEY=========\n");
     printf("1. Transfer USD\n");
     printf("2. Transfer KHR\n");
     printf("Enter your choice: ");
@@ -345,24 +375,4 @@ void TransferFunction(int index)
     {
         printf("Invalid Choice\n");
     }
-}
-// ---------------- Show Client Account ----------------
-void ShowClientAccount(int index)
-{
-    printf("\n========== CLIENT ACCOUNT SUMMARY ==========\n");
-
-    printf("Account Holder : %s\n", Accounts[index].Acc_name);
-    printf("Username       : %s\n", Accounts[index].login.username);
-    printf("Account Number : %d\n", Accounts[index].accountNumber);
-
-    printf("\n------ Balances ------\n");
-    printf("USD Balance    : %.2lf\n", Accounts[index].USD);
-    printf("🇰🇭 KHR Balance : %.2lf\n", Accounts[index].KHR);
-
-    double convertedKHR = Accounts[index].USD * 4100;
-    printf("Equivalent in KHR (from USD): %.2lf\n", convertedKHR);
-
-    printf("\n------ Savings ------\n");
-    printf("Saving USD   : %.2lf\n", Accounts[index].savingUSD);
-    printf("Saving KHR   : %.2lf\n", Accounts[index].savingKHR);
 }
