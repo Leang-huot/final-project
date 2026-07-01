@@ -4,10 +4,15 @@
 
 // Define
 #define Limit_User 100
+#define Max_History 100
 #define EXCHANGE_RATE 4100.0
 #define INTEREST_RATE 0.05   // 5% per year
 
 // Structure
+typedef struct {
+    char description[150];
+} Transaction;
+
 typedef struct {
     char Acc_name[50];
     char username[50];
@@ -24,6 +29,10 @@ typedef struct {
     double savingKHR;
 
     User_login login;
+
+    Transaction history[Max_History];
+    int historyCount;
+
 } account;
 
 // Global Variable
@@ -45,11 +54,15 @@ void WithdrawMoney(int index);
 void TransferMoney(int index);
 int FindAccountByNumber(int accountNumber);
 
-// Day 3 functions
+// Saving functions
 void SavingMenu(int index);
 void MoveToSaving(int index);
 void WithdrawFromSaving(int index);
 void ApplyInterest(int index);
+
+// Transaction history functions
+void AddTransaction(int index, char description[]);
+void ShowTransactionHistory(int index);
 
 int main() {
     interface();
@@ -93,7 +106,7 @@ void interface() {
                 break;
 
             default:
-                printf("Invalid choice. Try again.\n");
+                printf("Invalid choice. Try again\n");
         }
 
     } while (choice != 3);
@@ -126,11 +139,13 @@ void AccountCreation() {
         printf("Enter Your Password: ");
         scanf("%19s", NewAccount.login.password);
 
-        if (strlen(NewAccount.login.password) != 6) {
+        int passwordLength = strlen(NewAccount.login.password);
+
+        if (passwordLength != 6) {
             valid = 0;
         }
 
-        for (int i = 0; i < strlen(NewAccount.login.password); i++) {
+        for (int i = 0; i < passwordLength; i++) {
             if (!isdigit(NewAccount.login.password[i])) {
                 valid = 0;
             }
@@ -146,6 +161,7 @@ void AccountCreation() {
     NewAccount.KHR = 0;
     NewAccount.savingUSD = 0;
     NewAccount.savingKHR = 0;
+    NewAccount.historyCount = 0;
 
     Accounts[accountcount] = NewAccount;
     accountcount++;
@@ -199,7 +215,8 @@ void AccountMenu(int index) {
         printf("3. Withdraw Money\n");
         printf("4. Transfer Money\n");
         printf("5. Saving Account\n");
-        printf("6. Logout\n");
+        printf("6. Transaction History\n");
+        printf("7. Logout\n");
         printf("--------------------------------\n");
 
         printf("Enter your choice: ");
@@ -227,6 +244,10 @@ void AccountMenu(int index) {
                 break;
 
             case 6:
+                ShowTransactionHistory(index);
+                break;
+
+            case 7:
                 printf("\nLogout successful.\n");
                 break;
 
@@ -234,7 +255,7 @@ void AccountMenu(int index) {
                 printf("Invalid choice. Try again.\n");
         }
 
-    } while (choice != 6);
+    } while (choice != 7);
 }
 
 // Check balance function
@@ -250,6 +271,7 @@ void CheckBalance(int index) {
 void DepositMoney(int index) {
     int currencyChoice;
     double amount;
+    char description[150];
 
     printf("\n----------DEPOSIT MONEY----------\n");
     printf("1. Deposit USD\n");
@@ -267,11 +289,19 @@ void DepositMoney(int index) {
 
     if (currencyChoice == 1) {
         Accounts[index].USD += amount;
+
+        sprintf(description, "Deposited %.2lf USD", amount);
+        AddTransaction(index, description);
+
         printf("\nDeposit successful!\n");
         printf("New USD Balance: %.2lf USD\n", Accounts[index].USD);
     }
     else if (currencyChoice == 2) {
         Accounts[index].KHR += amount;
+
+        sprintf(description, "Deposited %.2lf KHR", amount);
+        AddTransaction(index, description);
+
         printf("\nDeposit successful!\n");
         printf("New KHR Balance: %.2lf KHR\n", Accounts[index].KHR);
     }
@@ -284,6 +314,7 @@ void DepositMoney(int index) {
 void WithdrawMoney(int index) {
     int currencyChoice;
     double amount;
+    char description[150];
 
     printf("\n----------WITHDRAW MONEY----------\n");
     printf("1. Withdraw USD\n");
@@ -302,6 +333,10 @@ void WithdrawMoney(int index) {
     if (currencyChoice == 1) {
         if (amount <= Accounts[index].USD) {
             Accounts[index].USD -= amount;
+
+            sprintf(description, "Withdrew %.2lf USD", amount);
+            AddTransaction(index, description);
+
             printf("\nWithdraw successful!\n");
             printf("New USD Balance: %.2lf USD\n", Accounts[index].USD);
         } else {
@@ -311,6 +346,10 @@ void WithdrawMoney(int index) {
     else if (currencyChoice == 2) {
         if (amount <= Accounts[index].KHR) {
             Accounts[index].KHR -= amount;
+
+            sprintf(description, "Withdrew %.2lf KHR", amount);
+            AddTransaction(index, description);
+
             printf("\nWithdraw successful!\n");
             printf("New KHR Balance: %.2lf KHR\n", Accounts[index].KHR);
         } else {
@@ -340,6 +379,9 @@ void TransferMoney(int index) {
     int transferChoice;
     double amount;
     double convertedAmount;
+
+    char senderDescription[150];
+    char receiverDescription[150];
 
     printf("\n----------TRANSFER MONEY----------\n");
 
@@ -383,6 +425,15 @@ void TransferMoney(int index) {
                 Accounts[index].USD -= amount;
                 Accounts[receiverIndex].USD += amount;
 
+                sprintf(senderDescription, "Transferred %.2lf USD to account %d",
+                        amount, Accounts[receiverIndex].accountNumber);
+
+                sprintf(receiverDescription, "Received %.2lf USD from account %d",
+                        amount, Accounts[index].accountNumber);
+
+                AddTransaction(index, senderDescription);
+                AddTransaction(receiverIndex, receiverDescription);
+
                 printf("\nTransfer successful!\n");
                 printf("You transferred %.2lf USD to %s.\n", amount, Accounts[receiverIndex].login.Acc_name);
                 printf("Your new USD balance: %.2lf USD\n", Accounts[index].USD);
@@ -395,6 +446,15 @@ void TransferMoney(int index) {
             if (amount <= Accounts[index].KHR) {
                 Accounts[index].KHR -= amount;
                 Accounts[receiverIndex].KHR += amount;
+
+                sprintf(senderDescription, "Transferred %.2lf KHR to account %d",
+                        amount, Accounts[receiverIndex].accountNumber);
+
+                sprintf(receiverDescription, "Received %.2lf KHR from account %d",
+                        amount, Accounts[index].accountNumber);
+
+                AddTransaction(index, senderDescription);
+                AddTransaction(receiverIndex, receiverDescription);
 
                 printf("\nTransfer successful!\n");
                 printf("You transferred %.2lf KHR to %s.\n", amount, Accounts[receiverIndex].login.Acc_name);
@@ -410,6 +470,15 @@ void TransferMoney(int index) {
 
                 Accounts[index].USD -= amount;
                 Accounts[receiverIndex].KHR += convertedAmount;
+
+                sprintf(senderDescription, "Transferred %.2lf USD to account %d as %.2lf KHR",
+                        amount, Accounts[receiverIndex].accountNumber, convertedAmount);
+
+                sprintf(receiverDescription, "Received %.2lf KHR from account %d converted from %.2lf USD",
+                        convertedAmount, Accounts[index].accountNumber, amount);
+
+                AddTransaction(index, senderDescription);
+                AddTransaction(receiverIndex, receiverDescription);
 
                 printf("\nTransfer successful!\n");
                 printf("You transferred %.2lf USD.\n", amount);
@@ -427,6 +496,15 @@ void TransferMoney(int index) {
 
                 Accounts[index].KHR -= amount;
                 Accounts[receiverIndex].USD += convertedAmount;
+
+                sprintf(senderDescription, "Transferred %.2lf KHR to account %d as %.2lf USD",
+                        amount, Accounts[receiverIndex].accountNumber, convertedAmount);
+
+                sprintf(receiverDescription, "Received %.2lf USD from account %d converted from %.2lf KHR",
+                        convertedAmount, Accounts[index].accountNumber, amount);
+
+                AddTransaction(index, senderDescription);
+                AddTransaction(receiverIndex, receiverDescription);
 
                 printf("\nTransfer successful!\n");
                 printf("You transferred %.2lf KHR.\n", amount);
@@ -486,6 +564,7 @@ void SavingMenu(int index) {
 void MoveToSaving(int index) {
     int currencyChoice;
     double amount;
+    char description[150];
 
     printf("\n----------MOVE MONEY TO SAVING----------\n");
     printf("1. Move USD to Saving USD\n");
@@ -506,6 +585,9 @@ void MoveToSaving(int index) {
             Accounts[index].USD -= amount;
             Accounts[index].savingUSD += amount;
 
+            sprintf(description, "Moved %.2lf USD to Saving USD", amount);
+            AddTransaction(index, description);
+
             printf("\nMoved to saving successfully!\n");
             printf("Current USD Balance: %.2lf USD\n", Accounts[index].USD);
             printf("Saving USD Balance: %.2lf USD\n", Accounts[index].savingUSD);
@@ -517,6 +599,9 @@ void MoveToSaving(int index) {
         if (amount <= Accounts[index].KHR) {
             Accounts[index].KHR -= amount;
             Accounts[index].savingKHR += amount;
+
+            sprintf(description, "Moved %.2lf KHR to Saving KHR", amount);
+            AddTransaction(index, description);
 
             printf("\nMoved to saving successfully!\n");
             printf("Current KHR Balance: %.2lf KHR\n", Accounts[index].KHR);
@@ -534,6 +619,7 @@ void MoveToSaving(int index) {
 void WithdrawFromSaving(int index) {
     int currencyChoice;
     double amount;
+    char description[150];
 
     printf("\n----------WITHDRAW FROM SAVING----------\n");
     printf("1. Withdraw from Saving USD\n");
@@ -554,6 +640,9 @@ void WithdrawFromSaving(int index) {
             Accounts[index].savingUSD -= amount;
             Accounts[index].USD += amount;
 
+            sprintf(description, "Withdrew %.2lf USD from Saving USD", amount);
+            AddTransaction(index, description);
+
             printf("\nWithdraw from saving successful!\n");
             printf("Current USD Balance: %.2lf USD\n", Accounts[index].USD);
             printf("Saving USD Balance: %.2lf USD\n", Accounts[index].savingUSD);
@@ -565,6 +654,9 @@ void WithdrawFromSaving(int index) {
         if (amount <= Accounts[index].savingKHR) {
             Accounts[index].savingKHR -= amount;
             Accounts[index].KHR += amount;
+
+            sprintf(description, "Withdrew %.2lf KHR from Saving KHR", amount);
+            AddTransaction(index, description);
 
             printf("\nWithdraw from saving successful!\n");
             printf("Current KHR Balance: %.2lf KHR\n", Accounts[index].KHR);
@@ -583,6 +675,7 @@ void ApplyInterest(int index) {
     int currencyChoice;
     int months;
     double interest;
+    char description[150];
 
     printf("\n----------APPLY SAVING INTEREST----------\n");
     printf("Interest rate: %.2lf%% per year\n", INTEREST_RATE * 100);
@@ -609,6 +702,9 @@ void ApplyInterest(int index) {
         interest = Accounts[index].savingUSD * INTEREST_RATE * months / 12;
         Accounts[index].savingUSD += interest;
 
+        sprintf(description, "Applied interest for %d months: earned %.2lf USD", months, interest);
+        AddTransaction(index, description);
+
         printf("\nInterest added successfully!\n");
         printf("Interest earned: %.2lf USD\n", interest);
         printf("New Saving USD Balance: %.2lf USD\n", Accounts[index].savingUSD);
@@ -622,11 +718,39 @@ void ApplyInterest(int index) {
         interest = Accounts[index].savingKHR * INTEREST_RATE * months / 12;
         Accounts[index].savingKHR += interest;
 
+        sprintf(description, "Applied interest for %d months: earned %.2lf KHR", months, interest);
+        AddTransaction(index, description);
+
         printf("\nInterest added successfully!\n");
         printf("Interest earned: %.2lf KHR\n", interest);
         printf("New Saving KHR Balance: %.2lf KHR\n", Accounts[index].savingKHR);
     }
     else {
         printf("Invalid choice.\n");
+    }
+}
+
+// Add transaction history
+void AddTransaction(int index, char description[]) {
+    if (Accounts[index].historyCount >= Max_History) {
+        printf("\nTransaction history is full.\n");
+        return;
+    }
+
+    strcpy(Accounts[index].history[Accounts[index].historyCount].description, description);
+    Accounts[index].historyCount++;
+}
+
+// Show transaction history
+void ShowTransactionHistory(int index) {
+    printf("\n----------TRANSACTION HISTORY----------\n");
+
+    if (Accounts[index].historyCount == 0) {
+        printf("No transaction history yet.\n");
+        return;
+    }
+
+    for (int i = 0; i < Accounts[index].historyCount; i++) {
+        printf("%d. %s\n", i + 1, Accounts[index].history[i].description);
     }
 }
