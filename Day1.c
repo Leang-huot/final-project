@@ -231,19 +231,21 @@ void DepositFunction(int index){
     printf("Enter your choice: ");
     scanf("%d", &currencyChoice);
 
-    printf("Enter USD amount : ");
-    scanf("%lf" , &amount);
     if (amount <= 0){
         printf("You must deposit more than 0\n");
         return;
     }
     if (currencyChoice == 1){
+        printf("Enter USD amount : ");
+        scanf("%lf" , &amount);
         Accounts[index].USD += amount;
         printf("Deposit successfuly\n");
         printf("Your current balance now is : %.2lf USD\n",Accounts[index].USD);
     }
     else if (currencyChoice == 2){
-        Accounts[index].KHR += amount*4100;
+        printf("Enter KHR amount : ");
+        scanf("%lf" , &amount);
+        Accounts[index].KHR += amount;
         printf("Deposit successfuly\n");
         printf("Your current balance now is : %.2lf KHR\n",Accounts[index].KHR);
     }
