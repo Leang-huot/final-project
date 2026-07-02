@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 //Global Variable
 #define Limit_User 100
 #define Exchange_rate 4100
@@ -24,6 +25,10 @@ typedef struct{
 
     int historyCount;
 
+    int savingType;
+    int savingperiod;
+    int savingstartyear;
+
     User_login login;
 }account;
 
@@ -42,6 +47,8 @@ void WithdrawFunction(int index);
 void TransferFunction(int index);
 int FindAccountByNumber(int accountNumber);
 
+//Saving
+void saving(int index);
 
 int main(){
     interface();
@@ -182,7 +189,8 @@ void BankingFunction(int index){
         printf("2.deposit money\n");
         printf("3.Transfer money\n");
         printf("4.Withdraw money\n");
-        printf("5.Log out\n");
+        printf("5.Saving account\n");
+        printf("6.Log out\n");
 
 
         printf("Enter your choice : ");
@@ -201,7 +209,9 @@ void BankingFunction(int index){
             case 4 :
                 WithdrawFunction(index);
                 break;
-            case 5 : 
+            case 5 :
+                saving(index);
+            case 6 : 
                 printf("Logout successfully\n");
                 break;
             default : 
@@ -209,7 +219,7 @@ void BankingFunction(int index){
         }
 
 
-    }while(choice !=5);
+    }while(choice !=6);
 }
 
 void CheckBalance(int index){
@@ -377,5 +387,106 @@ void TransferFunction(int index)
     else
     {
         printf("Invalid Choice\n");
+    }
+}
+void saving(int index)
+{
+    int type, currencychoice, years;
+    double amount;
+
+    printf("\n\n------welcome smart saving------\n");
+    printf("1. Simple Interest (withdraw anytime)\n");
+    printf("2. Compound Interest (locked until maturity)\n");
+
+    printf("Enter your choice: ");
+    scanf("%d", &type);
+
+    printf("1. USD\n");
+    printf("2. KHR\n");
+    scanf("%d", &currencychoice);
+
+    printf("Enter amount: ");
+    scanf("%lf", &amount); 
+
+    printf("Enter saving year: ");
+    scanf("%d", &years);
+
+
+
+
+
+
+
+
+    if (currencychoice == 1 && Accounts[index].USD >= amount)
+    {
+        Accounts[index].USD -= amount;
+        Accounts[index].savingUSD += amount;
+    }
+    else if (currencychoice == 2 && Accounts[index].KHR >= amount)
+    {
+        Accounts[index].KHR -= amount;
+        Accounts[index].savingKHR += amount;
+    }
+    else
+    {
+        printf(" Insufficient balance.\n");
+        return;
+    }
+
+    if (type == 1)
+    {
+        Accounts[index].savingType = 1;
+        Accounts[index].savingperiod = 0;
+
+        double rate = (currencychoice == 1) ? 0.03 : 0.04;
+        double interest = amount * rate * years;
+
+        printf("Simple Interest: %f\n", interest);
+
+        if (currencychoice == 1)
+            Accounts[index].savingUSD += interest;
+        else
+            Accounts[index].savingKHR += interest;
+    }
+    else if (type == 2)
+    {
+        Accounts[index].savingType = 2;
+        Accounts[index].savingstartyear = 2026;
+
+        int savingperiod;
+        printf("Enter investment year: ");
+        scanf("%d", &savingperiod);
+
+        int finalyear = savingperiod + Accounts[index].savingstartyear;
+
+        printf("The final year you get the money is %d\n", finalyear);
+
+        if (finalyear < Accounts[index].savingstartyear)
+        {
+            printf(" Compound interest not available.\n");
+            return;
+        }
+
+        double rateUSD = 0.03;
+        double rateKHR = 0.04;
+
+        double newSavingUSD = Accounts[index].savingUSD * pow((1 + rateUSD), savingperiod);
+        double newSavingKHR = Accounts[index].savingKHR * pow((1 + rateKHR), savingperiod);
+
+        double interestUSD = newSavingUSD - Accounts[index].savingUSD;
+        double interestKHR = newSavingKHR - Accounts[index].savingKHR;
+
+        Accounts[index].savingUSD = newSavingUSD;
+        Accounts[index].savingKHR = newSavingKHR;
+        Accounts[index].savingperiod = savingperiod;
+
+        printf("Compound interest applied!\n");
+        printf("USD Interest: %.2lf | New Saving USD: %.2lf\n", interestUSD, Accounts[index].savingUSD);
+        printf("KHR Interest: %.2lf | New Saving KHR: %.2lf\n", interestKHR, Accounts[index].savingKHR);
+    }
+    else
+    {
+        printf("Invalid choice.\n");
     }
 }
