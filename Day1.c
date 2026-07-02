@@ -411,13 +411,6 @@ void saving(int index)
     printf("Enter saving year: ");
     scanf("%d", &years);
 
-
-
-
-
-
-
-
     if (currencychoice == 1 && Accounts[index].USD >= amount)
     {
         Accounts[index].USD -= amount;
